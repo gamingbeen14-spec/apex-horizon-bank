@@ -1,0 +1,1548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Apex Horizon National Bank - Secure Online Banking</title>
+  <!-- Google Fonts & Tailwind CDN & Lucide Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            bank: {
+              50: '#f0f5fa',
+              100: '#e1ecf5',
+              200: '#c3d9eb',
+              300: '#94bcdd',
+              400: '#5e9bc9',
+              500: '#387eb3',
+              600: '#286496',
+              700: '#1e4f79',
+              800: '#193f61',
+              900: '#0b192c',
+              950: '#060f1c'
+            },
+            accent: {
+              gold: '#c5a059',
+              emerald: '#10b981',
+              crimson: '#ef4444'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased selection:bg-bank-600 selection:text-white min-h-screen flex flex-col justify-between">
+
+  <!-- ================= TOP TICKER / SECURITY BAR ================= -->
+  <div class="bg-bank-950 text-slate-300 text-xs py-1.5 px-4 sm:px-8 border-b border-bank-800/60 flex flex-wrap justify-between items-center gap-2 z-50">
+    <div class="flex items-center gap-3">
+      <span class="inline-flex items-center gap-1.5 text-emerald-400 font-medium">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        256-Bit TLS 1.3 Bank-Grade Encryption
+      </span>
+      <span class="hidden md:inline text-slate-500">|</span>
+      <span class="hidden md:inline text-slate-400 font-mono text-[11px]">FDIC Insured up to $250,000</span>
+    </div>
+    <div class="flex items-center gap-4 text-slate-300">
+      <div id="session-timer-wrap" class="hidden items-center gap-1.5 font-mono text-[11px] bg-bank-900/80 px-2.5 py-0.5 rounded border border-bank-700/50">
+        <i data-lucide="clock" class="w-3.5 h-3.5 text-amber-400"></i>
+        <span>Session auto-expires: </span>
+        <span id="session-timer" class="font-bold text-amber-400">05:00</span>
+      </div>
+      <span class="hidden sm:inline text-slate-400">Customer Care: 1-800-555-APEX</span>
+    </div>
+  </div>
+
+  <!-- ================= NOTIFICATIONS / TOAST CONTAINER ================= -->
+  <div id="toast-container" class="fixed top-12 right-4 z-[9999] flex flex-col gap-2 max-w-sm pointer-events-none"></div>
+
+  <!-- ================= MAIN HEADER NAVBAR ================= -->
+  <header id="main-header" class="bg-white/95 backdrop-blur-md sticky top-0 border-b border-slate-200/80 z-40 shadow-xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between">
+      <!-- Brand Logo -->
+      <div class="flex items-center gap-3 cursor-pointer" onclick="navigateHome()">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-bank-900 via-bank-700 to-bank-500 flex items-center justify-center text-white shadow-md shadow-bank-900/10">
+          <i data-lucide="shield-check" class="w-6 h-6 text-white"></i>
+        </div>
+        <div>
+          <span class="font-extrabold text-xl tracking-tight text-bank-950 flex items-center gap-1">
+            APEX <span class="text-bank-600 font-semibold">HORIZON</span>
+          </span>
+          <p class="text-[10px] tracking-wider uppercase font-semibold text-slate-400 -mt-1">National Retail & Trust Bank</p>
+        </div>
+      </div>
+
+      <!-- Auth State Header Right Controls -->
+      <div id="header-user-nav" class="hidden items-center gap-3 sm:gap-5">
+        <!-- Quick Notification Bell -->
+        <div class="relative">
+          <button id="btn-notifications" class="p-2 text-slate-500 hover:text-bank-700 hover:bg-slate-100 rounded-lg relative transition-all" title="Notifications">
+            <i data-lucide="bell" class="w-5 h-5"></i>
+            <span id="notification-badge" class="absolute top-1.5 right-1.5 w-2 h-2 bg-amber-500 rounded-full"></span>
+          </button>
+          <!-- Notification Dropdown -->
+          <div id="notifications-menu" class="hidden absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-xl border border-slate-200 p-3 z-50 text-xs">
+            <div class="flex items-center justify-between pb-2 border-b border-slate-100 mb-2">
+              <span class="font-bold text-slate-800 text-sm">Security Notices</span>
+              <span class="text-[10px] text-bank-600 font-semibold uppercase">Active</span>
+            </div>
+            <div class="space-y-2 text-slate-600" id="notification-list">
+              <div class="p-2 bg-slate-50 rounded-lg border border-slate-100">
+                <p class="font-semibold text-slate-700">Two-Factor Authentication Active</p>
+                <p class="text-[11px] text-slate-500">Your session is safeguarded with encrypted hardware fingerprinting.</p>
+              </div>
+              <div class="p-2 bg-slate-50 rounded-lg border border-slate-100">
+                <p class="font-semibold text-slate-700">Scheduled Settlement Cutoff</p>
+                <p class="text-[11px] text-slate-500">Internal ACH transfers process instantaneously in this simulation.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- User Info Chip -->
+        <div class="flex items-center gap-2 pl-2 border-l border-slate-200">
+          <div class="w-8 h-8 rounded-full bg-bank-100 text-bank-700 font-bold flex items-center justify-center text-xs" id="user-avatar-initials">
+            --
+          </div>
+          <div class="hidden sm:block text-left">
+            <div class="text-xs font-bold text-slate-900 leading-tight" id="header-user-name">Account Holder</div>
+            <div class="text-[10px] font-semibold text-bank-600 capitalize leading-tight" id="header-user-role">Authorized Session</div>
+          </div>
+        </div>
+
+        <!-- Secure Logout Button -->
+        <button onclick="handleLogout()" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-rose-600 hover:text-white bg-rose-50 hover:bg-rose-600 border border-rose-200 hover:border-rose-600 rounded-lg transition-all shadow-xs" title="Sign out securely">
+          <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+          <span class="hidden sm:inline">Secure Logout</span>
+        </button>
+      </div>
+
+      <!-- Logged Out Status / Demo Help -->
+      <div id="header-logged-out" class="flex items-center gap-2">
+        <span class="inline-flex items-center gap-1 text-xs font-medium text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full border border-slate-200">
+          <i data-lucide="lock" class="w-3 h-3 text-slate-400"></i>
+          Customer & Admin Gateway
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= APP CONTENT CONTAINER ================= -->
+  <main class="flex-grow flex flex-col">
+
+    <!-- ---------------------------------------------------- -->
+    <!-- 1. AUTHENTICATION PORTAL (LOGIN SCREEN)             -->
+    <!-- ---------------------------------------------------- -->
+    <section id="view-login" class="flex-grow flex items-center justify-center p-4 sm:p-6 lg:p-8 bg-gradient-to-b from-slate-50 via-bank-50/30 to-slate-100">
+      <div class="w-full max-w-4xl bg-white rounded-2xl shadow-xl border border-slate-200/90 overflow-hidden grid grid-cols-1 lg:grid-cols-12 min-h-[580px]">
+        
+        <!-- Left Side: Brand Narrative & Security Highlights -->
+        <div class="lg:col-span-5 bg-gradient-to-br from-bank-950 via-bank-900 to-bank-800 p-8 text-white flex flex-col justify-between relative overflow-hidden">
+          <div class="absolute -right-10 -bottom-10 w-60 h-60 bg-bank-600/20 rounded-full blur-2xl pointer-events-none"></div>
+          <div class="absolute top-0 right-0 w-32 h-32 bg-accent-gold/10 rounded-full blur-xl pointer-events-none"></div>
+          
+          <div class="relative z-10">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-bank-800/80 border border-bank-700/60 text-bank-200 text-xs font-medium mb-6">
+              <i data-lucide="shield" class="w-3.5 h-3.5 text-accent-gold"></i>
+              Verified Banking Gateway
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white mb-3">
+              Banking Built for Absolute Trust.
+            </h1>
+            <p class="text-sm text-slate-300 leading-relaxed">
+              Experience seamless liquidity management, instant transfers, smart credit facilities, and real-time ledger tracking in one intuitive banking platform.
+            </p>
+          </div>
+
+          <!-- Live Feature Checklist -->
+          <div class="space-y-3.5 my-8 text-xs text-slate-300 relative z-10">
+            <div class="flex items-center gap-2.5">
+              <div class="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+                <i data-lucide="check" class="w-3.5 h-3.5"></i>
+              </div>
+              <span>Real-Time Balance Settlement & Routing</span>
+            </div>
+            <div class="flex items-center gap-2.5">
+              <div class="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+                <i data-lucide="check" class="w-3.5 h-3.5"></i>
+              </div>
+              <span>Chequebook & Credit Card Request Queue</span>
+            </div>
+            <div class="flex items-center gap-2.5">
+              <div class="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+                <i data-lucide="check" class="w-3.5 h-3.5"></i>
+              </div>
+              <span>Bank Director / Admin Liquidity Oversight</span>
+            </div>
+          </div>
+
+          <!-- Quick Test Credentials Box -->
+          <div class="bg-bank-900/90 border border-bank-700/70 rounded-xl p-3 text-xs relative z-10">
+            <div class="font-bold text-bank-200 mb-1 flex items-center justify-between">
+              <span>Quick Demo Fillers:</span>
+              <span class="text-[10px] text-amber-300">Click to autofill</span>
+            </div>
+            <div class="grid grid-cols-2 gap-2 mt-2">
+              <button type="button" onclick="quickFillLogin('customer')" class="text-left p-1.5 rounded bg-bank-800/80 hover:bg-bank-700/90 border border-bank-700 text-[11px] transition">
+                <div class="font-bold text-white">Customer Login</div>
+                <div class="text-[10px] text-slate-400 font-mono">user: jane / 1234</div>
+              </button>
+              <button type="button" onclick="quickFillLogin('admin')" class="text-left p-1.5 rounded bg-bank-800/80 hover:bg-bank-700/90 border border-bank-700 text-[11px] transition">
+                <div class="font-bold text-accent-gold">Admin Portal</div>
+                <div class="text-[10px] text-slate-400 font-mono">user: admin / admin</div>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Side: Dual-Mode Login Form -->
+        <div class="lg:col-span-7 p-6 sm:p-10 flex flex-col justify-center">
+          
+          <!-- Portal Switcher Tabs -->
+          <div class="mb-6">
+            <div class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Select Access Portal</div>
+            <div class="bg-slate-100 p-1 rounded-xl flex">
+              <button id="tab-btn-customer" type="button" onclick="switchLoginPortal('customer')" class="flex-1 py-2 px-4 rounded-lg font-bold text-xs sm:text-sm text-center transition-all bg-white text-bank-900 shadow-xs border border-slate-200/60 flex items-center justify-center gap-2">
+                <i data-lucide="user" class="w-4 h-4 text-bank-600"></i>
+                Customer Portal
+              </button>
+              <button id="tab-btn-admin" type="button" onclick="switchLoginPortal('admin')" class="flex-1 py-2 px-4 rounded-lg font-bold text-xs sm:text-sm text-center transition-all text-slate-500 hover:text-slate-800 flex items-center justify-center gap-2">
+                <i data-lucide="shield-alert" class="w-4 h-4"></i>
+                Admin / Officer
+              </button>
+            </div>
+          </div>
+
+          <!-- Dynamic Heading -->
+          <div class="mb-6">
+            <h2 id="login-title" class="text-2xl font-bold text-slate-900">Sign In to Online Banking</h2>
+            <p id="login-subtitle" class="text-xs sm:text-sm text-slate-500 mt-1">
+              Enter your banking account number or registered username.
+            </p>
+          </div>
+
+          <!-- Form Element -->
+          <form id="form-login" onsubmit="handleFormLogin(event)" class="space-y-4">
+            <!-- Username / Account Number -->
+            <div>
+              <label for="login-username" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                <span id="label-username-text">Username / Account Number</span>
+              </label>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                  <i data-lucide="credit-card" class="w-4 h-4"></i>
+                </div>
+                <input 
+                  type="text" 
+                  id="login-username" 
+                  required
+                  placeholder="e.g. jane or 1002348911"
+                  class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-bank-600 focus:border-bank-600 transition"
+                >
+              </div>
+            </div>
+
+            <!-- Password -->
+            <div>
+              <div class="flex items-center justify-between mb-1.5">
+                <label for="login-password" class="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                  Password
+                </label>
+                <button type="button" onclick="openForgotPasswordModal()" class="text-xs text-bank-600 hover:text-bank-800 font-semibold transition">
+                  Forgot Password?
+                </button>
+              </div>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                  <i data-lucide="lock" class="w-4 h-4"></i>
+                </div>
+                <input 
+                  type="password" 
+                  id="login-password" 
+                  required
+                  placeholder="••••••••••••"
+                  class="w-full pl-10 pr-10 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-bank-600 focus:border-bank-600 transition"
+                >
+                <button type="button" onclick="togglePasswordVisibility('login-password')" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600">
+                  <i data-lucide="eye" class="w-4 h-4" id="eye-icon"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Phone Number for Verification (MiniMoth OTP) -->
+            <div>
+              <div class="flex items-center justify-between mb-1.5">
+                <label for="login-phone" class="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                  Phone Number for OTP
+                </label>
+                <span class="text-[10px] text-emerald-600 font-semibold flex items-center gap-1">
+                  <i data-lucide="message-square" class="w-3 h-3"></i> WhatsApp / SMS
+                </span>
+              </div>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                  <i data-lucide="phone" class="w-4 h-4"></i>
+                </div>
+                <input 
+                  type="tel" 
+                  id="login-phone" 
+                  placeholder="e.g. +91 98200 98200 or 10-digit number"
+                  class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-bank-600 focus:border-bank-600 transition"
+                >
+              </div>
+              <p class="text-[11px] text-slate-400 mt-1">Leave empty to use user's registered phone, or type your mobile to test real SMS/WhatsApp OTP.</p>
+            </div>
+
+
+            <!-- Remember me & Security indicator -->
+            <div class="flex items-center justify-between text-xs text-slate-600 pt-1">
+              <label class="flex items-center gap-2 cursor-pointer select-none">
+                <input type="checkbox" id="login-remember" class="w-4 h-4 text-bank-600 rounded border-slate-300 focus:ring-bank-500">
+                <span>Remember this authorized device</span>
+              </label>
+              <span class="text-slate-400 text-[11px] flex items-center gap-1">
+                <i data-lucide="shield" class="w-3 h-3 text-emerald-500"></i>
+                Anti-fraud Protected
+              </span>
+            </div>
+
+            <!-- Error Banner -->
+            <div id="login-error-msg" class="hidden p-3 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium"></div>
+
+            <!-- Submit Button -->
+            <button 
+              type="submit" 
+              id="btn-login-submit"
+              class="w-full py-3 px-4 bg-bank-800 hover:bg-bank-900 active:bg-bank-950 text-white font-bold text-sm rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2"
+            >
+              <span>Authenticate & Access Account</span>
+              <i data-lucide="arrow-right" class="w-4 h-4"></i>
+            </button>
+
+            <!-- New Customer Account Registration Action -->
+            <div id="register-account-prompt" class="pt-2 text-center">
+              <span class="text-xs text-slate-500">Don't have an Apex Horizon account?</span>
+              <button type="button" onclick="openSelfRegisterModal()" class="ml-1 text-xs font-bold text-bank-600 hover:text-bank-800 hover:underline">
+                Open a Bank Account Online
+              </button>
+            </div>
+          </form>
+
+          <!-- Footer note -->
+          <div class="mt-6 pt-4 border-t border-slate-100 text-center">
+            <p class="text-xs text-slate-500">
+              Need assistance? Call Apex Treasury Support at <span class="font-semibold text-slate-700">1-800-555-APEX</span>
+            </p>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ---------------------------------------------------- -->
+    <!-- 2. CUSTOMER & ADMIN DASHBOARD MAIN WRAPPER          -->
+    <!-- ---------------------------------------------------- -->
+    <div id="view-app-portal" class="hidden flex-grow flex flex-col md:flex-row max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 gap-6">
+
+      <!-- Navigation Sidebar -->
+      <aside class="w-full md:w-64 shrink-0">
+        <div class="bg-white rounded-2xl border border-slate-200/90 shadow-xs p-4 sticky top-24">
+          
+          <!-- User / Admin Quick Badge -->
+          <div class="p-3 bg-bank-50/70 border border-bank-100 rounded-xl mb-4 flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-bank-800 text-white font-extrabold flex items-center justify-center text-sm shadow-xs" id="sidebar-avatar">
+              --
+            </div>
+            <div class="overflow-hidden">
+              <p class="text-xs font-bold text-slate-900 truncate" id="sidebar-name">User Account</p>
+              <p class="text-[11px] font-mono text-slate-500 truncate" id="sidebar-acc-no">AC: •••• ----</p>
+            </div>
+          </div>
+
+          <!-- Navigation Links for Customer -->
+          <nav id="nav-customer-group" class="space-y-1">
+            <div class="text-[10px] uppercase font-bold tracking-wider text-slate-400 px-3 py-1.5">Banking Services</div>
+            <button onclick="switchCustomerTab('tab-overview')" id="nav-link-overview" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-semibold text-xs sm:text-sm text-left transition-all bg-bank-800 text-white shadow-xs">
+              <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+              <span>Account Overview</span>
+            </button>
+            <button onclick="switchCustomerTab('tab-transfer')" id="nav-link-transfer" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-semibold text-xs sm:text-sm text-left transition-all text-slate-600 hover:bg-slate-100 hover:text-slate-900">
+              <i data-lucide="send" class="w-4 h-4"></i>
+              <span>Transfer Funds</span>
+            </button>
+            <button onclick="switchCustomerTab('tab-history')" id="nav-link-history" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-semibold text-xs sm:text-sm text-left transition-all text-slate-600 hover:bg-slate-100 hover:text-slate-900">
+              <i data-lucide="history" class="w-4 h-4"></i>
+              <span>Transaction History</span>
+            </button>
+            <button onclick="switchCustomerTab('tab-services')" id="nav-link-services" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-semibold text-xs sm:text-sm text-left transition-all text-slate-600 hover:bg-slate-100 hover:text-slate-900">
+              <i data-lucide="layers" class="w-4 h-4"></i>
+              <span>Bank Services & Cards</span>
+              <span id="badge-my-pending-count" class="ml-auto text-[10px] bg-amber-100 text-amber-800 font-bold px-1.5 py-0.5 rounded-full hidden">0</span>
+            </button>
+          </nav>
+
+          <!-- Navigation Links for Admin -->
+          <nav id="nav-admin-group" class="hidden space-y-1">
+            <div class="text-[10px] uppercase font-bold tracking-wider text-slate-400 px-3 py-1.5">Bank Administration</div>
+            <button onclick="switchAdminTab('tab-admin-overview')" id="nav-link-admin-overview" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-semibold text-xs sm:text-sm text-left transition-all bg-bank-800 text-white shadow-xs">
+              <i data-lucide="pie-chart" class="w-4 h-4"></i>
+              <span>Liquidity Overview</span>
+            </button>
+            <button onclick="switchAdminTab('tab-admin-users')" id="nav-link-admin-users" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-semibold text-xs sm:text-sm text-left transition-all text-slate-600 hover:bg-slate-100 hover:text-slate-900">
+              <i data-lucide="users" class="w-4 h-4"></i>
+              <span>User Directory</span>
+            </button>
+            <button onclick="switchAdminTab('tab-admin-approvals')" id="nav-link-admin-approvals" class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl font-semibold text-xs sm:text-sm text-left transition-all text-slate-600 hover:bg-slate-100 hover:text-slate-900">
+              <div class="flex items-center gap-3">
+                <i data-lucide="check-square" class="w-4 h-4"></i>
+                <span>Approval Queue</span>
+              </div>
+              <span id="badge-admin-pending" class="text-xs bg-amber-500 text-white font-extrabold px-2 py-0.5 rounded-full">0</span>
+            </button>
+          </nav>
+
+          <!-- Sidebar Support & Security Badge -->
+          <div class="mt-8 pt-4 border-t border-slate-100 space-y-3">
+            <div class="bg-emerald-50 border border-emerald-200/80 rounded-xl p-3 flex items-start gap-2.5 text-xs text-emerald-900">
+              <i data-lucide="shield-check" class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5"></i>
+              <div>
+                <span class="font-bold block">Biometric / 2FA Guard</span>
+                <span class="text-[11px] text-emerald-700">Encrypted token verified for session #<span id="session-token-sub">7F9A</span></span>
+              </div>
+            </div>
+            
+            <button onclick="showQuickTransferModal()" id="btn-quick-transfer-aside" class="w-full py-2 px-3 bg-bank-50 hover:bg-bank-100 text-bank-700 font-bold text-xs rounded-xl border border-bank-200 transition flex items-center justify-center gap-2">
+              <i data-lucide="zap" class="w-3.5 h-3.5"></i>
+              <span>Express Pay</span>
+            </button>
+          </div>
+
+        </div>
+      </aside>
+
+      <!-- Main Central Work Area -->
+      <main class="flex-1 min-w-0">
+
+        <!-- ============================================== -->
+        <!-- CUSTOMER VIEW: 1. OVERVIEW                     -->
+        <!-- ============================================== -->
+        <section id="tab-overview" class="customer-subpage hidden space-y-6">
+          
+          <!-- Welcome Banner -->
+          <div class="bg-gradient-to-r from-bank-950 via-bank-900 to-bank-800 rounded-2xl p-6 text-white shadow-md relative overflow-hidden flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div class="relative z-10">
+              <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-md bg-bank-800 text-bank-200 text-xs font-medium mb-2 border border-bank-700">
+                <span>Direct Routing: #021000021</span>
+              </div>
+              <h2 class="text-2xl font-extrabold text-white">Welcome back, <span id="overview-greeting-name">Jane</span>!</h2>
+              <p class="text-slate-300 text-xs sm:text-sm mt-1">Here is the real-time financial status of your accounts as of today.</p>
+            </div>
+            <div class="flex items-center gap-2 relative z-10">
+              <button onclick="switchCustomerTab('tab-transfer')" class="px-4 py-2 bg-white text-bank-950 hover:bg-slate-100 font-bold text-xs rounded-xl shadow-xs transition flex items-center gap-1.5">
+                <i data-lucide="send" class="w-3.5 h-3.5 text-bank-600"></i>
+                Send Money
+              </button>
+              <button onclick="switchCustomerTab('tab-services')" class="px-4 py-2 bg-bank-800 hover:bg-bank-700 border border-bank-600 text-white font-bold text-xs rounded-xl transition flex items-center gap-1.5">
+                <i data-lucide="plus-circle" class="w-3.5 h-3.5 text-accent-gold"></i>
+                Apply for Card
+              </button>
+            </div>
+          </div>
+
+          <!-- Account Balances Row (Checking, Savings, Combined) -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            <!-- Checking Account Card -->
+            <div class="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-xs hover:border-bank-300 transition-all group">
+              <div class="flex items-center justify-between mb-3">
+                <div class="w-10 h-10 rounded-xl bg-bank-100 text-bank-700 flex items-center justify-center">
+                  <i data-lucide="credit-card" class="w-5 h-5"></i>
+                </div>
+                <span class="text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100 flex items-center gap-1">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Primary Active
+                </span>
+              </div>
+              <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Apex Premier Checking</p>
+              <p class="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-1 font-mono tracking-tight" id="balance-checking">$0.00</p>
+              <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+                <span class="font-mono text-[11px]" id="overview-acc-checking-no">AC: •••• 4891</span>
+                <button onclick="quickFillTransferFrom('checking')" class="font-bold text-bank-600 hover:text-bank-800 text-[11px] underline">Transfer Out</button>
+              </div>
+            </div>
+
+            <!-- Savings Account Card -->
+            <div class="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-xs hover:border-bank-300 transition-all group">
+              <div class="flex items-center justify-between mb-3">
+                <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center">
+                  <i data-lucide="trending-up" class="w-5 h-5"></i>
+                </div>
+                <span class="text-[11px] font-bold text-emerald-700 bg-emerald-100/70 px-2 py-0.5 rounded-full">
+                  4.85% APY Yield
+                </span>
+              </div>
+              <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">High-Yield Growth Savings</p>
+              <p class="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-1 font-mono tracking-tight" id="balance-savings">$0.00</p>
+              <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+                <span class="font-mono text-[11px]" id="overview-acc-savings-no">AC: •••• 9920</span>
+                <button onclick="quickFillTransferFrom('savings')" class="font-bold text-bank-600 hover:text-bank-800 text-[11px] underline">Transfer Out</button>
+              </div>
+            </div>
+
+            <!-- Total Net Liquidity Card -->
+            <div class="bg-gradient-to-br from-slate-900 to-bank-950 rounded-2xl p-5 text-white shadow-xs sm:col-span-2 lg:col-span-1">
+              <div class="flex items-center justify-between mb-3">
+                <div class="w-10 h-10 rounded-xl bg-white/10 text-accent-gold flex items-center justify-center">
+                  <i data-lucide="wallet" class="w-5 h-5"></i>
+                </div>
+                <span class="text-[11px] font-semibold text-slate-300 bg-white/10 px-2 py-0.5 rounded-full">
+                  Net Portfolio
+                </span>
+              </div>
+              <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Combined Available Funds</p>
+              <p class="text-2xl sm:text-3xl font-extrabold text-white mt-1 font-mono tracking-tight" id="balance-total">$0.00</p>
+              <div class="mt-4 pt-3 border-t border-white/10 flex items-center justify-between text-xs text-slate-300">
+                <span>Credit Score: <strong class="text-emerald-400 font-bold">785 (Excellent)</strong></span>
+                <i data-lucide="arrow-up-right" class="w-4 h-4 text-emerald-400"></i>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Action Bar -->
+          <div class="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-xs">
+            <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-4">Fast Banking Shortcuts</h3>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <button onclick="switchCustomerTab('tab-transfer')" class="p-3 rounded-xl bg-slate-50 hover:bg-bank-50 border border-slate-200 hover:border-bank-300 transition text-left flex items-center gap-3">
+                <div class="p-2 rounded-lg bg-bank-600 text-white">
+                  <i data-lucide="send" class="w-4 h-4"></i>
+                </div>
+                <div>
+                  <div class="font-bold text-xs text-slate-800">Wire / ACH</div>
+                  <div class="text-[10px] text-slate-500">Send instantly</div>
+                </div>
+              </button>
+
+              <button onclick="openSelfTransferModal()" class="p-3 rounded-xl bg-slate-50 hover:bg-bank-50 border border-slate-200 hover:border-bank-300 transition text-left flex items-center gap-3">
+                <div class="p-2 rounded-lg bg-emerald-600 text-white">
+                  <i data-lucide="repeat" class="w-4 h-4"></i>
+                </div>
+                <div>
+                  <div class="font-bold text-xs text-slate-800">Self Transfer</div>
+                  <div class="text-[10px] text-slate-500">Move checking & savings</div>
+                </div>
+              </button>
+
+              <button onclick="switchCustomerTab('tab-services')" class="p-3 rounded-xl bg-slate-50 hover:bg-bank-50 border border-slate-200 hover:border-bank-300 transition text-left flex items-center gap-3">
+                <div class="p-2 rounded-lg bg-amber-600 text-white">
+                  <i data-lucide="book-open" class="w-4 h-4"></i>
+                </div>
+                <div>
+                  <div class="font-bold text-xs text-slate-800">Chequebook</div>
+                  <div class="text-[10px] text-slate-500">Order new leaves</div>
+                </div>
+              </button>
+
+              <button onclick="downloadStatements()" class="p-3 rounded-xl bg-slate-50 hover:bg-bank-50 border border-slate-200 hover:border-bank-300 transition text-left flex items-center gap-3">
+                <div class="p-2 rounded-lg bg-indigo-600 text-white">
+                  <i data-lucide="download" class="w-4 h-4"></i>
+                </div>
+                <div>
+                  <div class="font-bold text-xs text-slate-800">e-Statements</div>
+                  <div class="text-[10px] text-slate-500">Export statement</div>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          <!-- Recent Transactions Preview -->
+          <div class="bg-white rounded-2xl border border-slate-200/90 shadow-xs overflow-hidden">
+            <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+              <div>
+                <h3 class="font-bold text-slate-900 text-base">Recent Ledger Activity</h3>
+                <p class="text-xs text-slate-500">Latest transactions posted to your accounts.</p>
+              </div>
+              <button onclick="switchCustomerTab('tab-history')" class="text-xs font-bold text-bank-600 hover:text-bank-800 flex items-center gap-1">
+                <span>View Full Statement</span>
+                <i data-lucide="chevron-right" class="w-4 h-4"></i>
+              </button>
+            </div>
+            
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs">
+                <thead class="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider border-b border-slate-200/60">
+                  <tr>
+                    <th class="py-3 px-4">Date / Time</th>
+                    <th class="py-3 px-4">Description</th>
+                    <th class="py-3 px-4">Account</th>
+                    <th class="py-3 px-4 text-right">Debit / Credit</th>
+                    <th class="py-3 px-4 text-right">Running Balance</th>
+                  </tr>
+                </thead>
+                <tbody id="overview-recent-txns-body" class="divide-y divide-slate-100 text-slate-700">
+                  <!-- Populated by JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- ============================================== -->
+        <!-- CUSTOMER VIEW: 2. FUNDS TRANSFER MODULE        -->
+        <!-- ============================================== -->
+        <section id="tab-transfer" class="customer-subpage hidden space-y-6">
+          <div class="bg-white rounded-2xl border border-slate-200/90 p-6 sm:p-8 shadow-xs">
+            <div class="max-w-2xl">
+              <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-bank-50 text-bank-700 border border-bank-200 text-xs font-bold mb-3">
+                <i data-lucide="shield-check" class="w-3.5 h-3.5 text-bank-600"></i>
+                Real-Time Automated Clearing House (ACH) & Fedwire Transfer
+              </div>
+              <h2 class="text-2xl font-extrabold text-slate-900">Transfer Funds Securely</h2>
+              <p class="text-sm text-slate-500 mt-1">
+                Initiate domestic wire or internal account transfer with instant balance settlement.
+              </p>
+            </div>
+
+            <!-- Transfer Form -->
+            <form id="form-transfer" onsubmit="handleFundTransfer(event)" class="mt-8 space-y-5 max-w-2xl">
+              
+              <!-- Source Account Selector -->
+              <div>
+                <label for="transfer-from-account" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Debiting From (Source Account) *
+                </label>
+                <div class="relative">
+                  <select id="transfer-from-account" onchange="updateTransferBalanceHint()" required class="w-full py-2.5 px-3 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-bank-600 font-medium">
+                    <option value="checking">Checking Account (•••• 4891)</option>
+                    <option value="savings">Savings Account (•••• 9920)</option>
+                  </select>
+                </div>
+                <div class="mt-1 text-xs text-slate-500 flex items-center justify-between">
+                  <span>Available Balance: <strong id="transfer-available-balance" class="font-mono text-bank-700 font-bold">$0.00</strong></span>
+                  <span class="text-[11px] text-slate-400">Zero transfer fee applies</span>
+                </div>
+              </div>
+
+              <!-- Beneficiary / Recipient Account -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label for="transfer-recipient-acc" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Beneficiary Account Number *
+                  </label>
+                  <div class="relative">
+                    <input 
+                      type="text" 
+                      id="transfer-recipient-acc" 
+                      required
+                      placeholder="e.g. 1002994821"
+                      class="w-full py-2.5 px-3 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-bank-600 font-mono"
+                    >
+                  </div>
+                  <span class="text-[11px] text-slate-400">Tip: use another user's account or dummy 10-digit number</span>
+                </div>
+
+                <div>
+                  <label for="transfer-recipient-name" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Beneficiary Name *
+                  </label>
+                  <input 
+                    type="text" 
+                    id="transfer-recipient-name" 
+                    required
+                    placeholder="e.g. Michael Henderson"
+                    class="w-full py-2.5 px-3 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-bank-600"
+                  >
+                </div>
+              </div>
+
+              <!-- Routing Number & Transfer Type -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label for="transfer-routing-no" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    9-Digit Routing (ABA / Fedwire) *
+                  </label>
+                  <input 
+                    type="text" 
+                    id="transfer-routing-no" 
+                    required
+                    value="021000021"
+                    maxlength="9"
+                    class="w-full py-2.5 px-3 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-bank-600 font-mono"
+                  >
+                </div>
+
+                <div>
+                  <label for="transfer-purpose" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Payment Classification
+                  </label>
+                  <select id="transfer-purpose" class="w-full py-2.5 px-3 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-bank-600">
+                    <option value="Personal Settlement">Personal Settlement</option>
+                    <option value="Invoice Payment">Commercial / Invoice</option>
+                    <option value="Family Support">Family Maintenance</option>
+                    <option value="Rental Payment">Rent & Utilities</option>
+                    <option value="Investment Deposit">Investment Funding</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Amount Input & Currency -->
+              <div>
+                <label for="transfer-amount" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Transfer Amount ($ USD) *
+                </label>
+                <div class="relative">
+                  <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500 font-bold text-base">
+                    $
+                  </div>
+                  <input 
+                    type="number" 
+                    id="transfer-amount" 
+                    step="0.01" 
+                    min="1.00" 
+                    required
+                    placeholder="0.00"
+                    class="w-full pl-8 pr-24 py-3 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 text-lg font-mono font-bold focus:bg-white focus:outline-none focus:ring-2 focus:ring-bank-600"
+                  >
+                  <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                    <button type="button" onclick="setQuickTransferAmount(100)" class="px-2 py-1 text-[11px] bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold rounded mr-1">+$100</button>
+                    <button type="button" onclick="setQuickTransferAmount(500)" class="px-2 py-1 text-[11px] bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold rounded">+$500</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Note / Remark -->
+              <div>
+                <label for="transfer-notes" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Transaction Memo / Note
+                </label>
+                <input 
+                  type="text" 
+                  id="transfer-notes" 
+                  placeholder="e.g. Dinner reimbursement or project retainer"
+                  class="w-full py-2.5 px-3 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-bank-600"
+                >
+              </div>
+
+              <!-- Security Confirmation Box -->
+              <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-600 flex items-start gap-3">
+                <i data-lucide="info" class="w-4 h-4 text-bank-600 shrink-0 mt-0.5"></i>
+                <p>
+                  By confirming this wire transmission, you authorize Apex Horizon Bank to debit your selected deposit account. Fund updates will reflect immediately on your real-time ledger.
+                </p>
+              </div>
+
+              <!-- Submit Button -->
+              <div class="pt-2 flex items-center gap-3">
+                <button 
+                  type="submit" 
+                  id="btn-submit-transfer"
+                  class="py-3 px-6 bg-bank-800 hover:bg-bank-900 text-white font-bold text-sm rounded-xl shadow-md transition flex items-center gap-2"
+                >
+                  <i data-lucide="lock" class="w-4 h-4"></i>
+                  <span>Execute Wire Transfer</span>
+                </button>
+                <button 
+                  type="button" 
+                  onclick="resetTransferForm()"
+                  class="py-3 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-sm rounded-xl transition"
+                >
+                  Clear Form
+                </button>
+              </div>
+
+            </form>
+          </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- CUSTOMER VIEW: 3. TRANSACTION HISTORY          -->
+        <!-- ============================================== -->
+        <section id="tab-history" class="customer-subpage hidden space-y-6">
+          <div class="bg-white rounded-2xl border border-slate-200/90 p-6 shadow-xs">
+            
+            <!-- Header & Filter Row -->
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-slate-100">
+              <div>
+                <h2 class="text-2xl font-extrabold text-slate-900">Account Statements & Activity</h2>
+                <p class="text-xs sm:text-sm text-slate-500 mt-1">Complete chronological audit trail of all credits and debits.</p>
+              </div>
+              
+              <!-- Export Statement Action -->
+              <div class="flex items-center gap-2">
+                <button onclick="downloadStatements()" class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl border border-slate-300 transition flex items-center gap-1.5">
+                  <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                  <span>Export CSV / PDF</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Filters Bar -->
+            <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 pt-5 pb-2">
+              <div class="sm:col-span-5 relative">
+                <i data-lucide="search" class="w-4 h-4 absolute left-3 top-3 text-slate-400"></i>
+                <input 
+                  type="text" 
+                  id="filter-txn-search" 
+                  oninput="renderCustomerTransactions()"
+                  placeholder="Search description, recipient or memo..." 
+                  class="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-bank-600 focus:bg-white"
+                >
+              </div>
+              <div class="sm:col-span-3">
+                <select id="filter-txn-account" onchange="renderCustomerTransactions()" class="w-full py-2 px-3 bg-slate-50 border border-slate-300 rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-bank-600">
+                  <option value="all">All Accounts</option>
+                  <option value="checking">Checking Only</option>
+                  <option value="savings">Savings Only</option>
+                </select>
+              </div>
+              <div class="sm:col-span-2">
+                <select id="filter-txn-type" onchange="renderCustomerTransactions()" class="w-full py-2 px-3 bg-slate-50 border border-slate-300 rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-bank-600">
+                  <option value="all">All Types</option>
+                  <option value="debit">Debits (-)</option>
+                  <option value="credit">Credits (+)</option>
+                </select>
+              </div>
+              <div class="sm:col-span-2">
+                <select id="filter-txn-sort" onchange="renderCustomerTransactions()" class="w-full py-2 px-3 bg-slate-50 border border-slate-300 rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-bank-600">
+                  <option value="newest">Newest First</option>
+                  <option value="oldest">Oldest First</option>
+                  <option value="highest">Highest Amount</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Table -->
+            <div class="overflow-x-auto mt-4 rounded-xl border border-slate-200">
+              <table class="w-full text-left text-xs sm:text-sm">
+                <thead class="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider text-[11px] border-b border-slate-200">
+                  <tr>
+                    <th class="py-3 px-4">Transaction ID / Date</th>
+                    <th class="py-3 px-4">Description / Reference</th>
+                    <th class="py-3 px-4">Account Type</th>
+                    <th class="py-3 px-4 text-right">Debit (-) / Credit (+)</th>
+                    <th class="py-3 px-4 text-right">Running Balance</th>
+                  </tr>
+                </thead>
+                <tbody id="full-txn-history-body" class="divide-y divide-slate-100 text-slate-700">
+                  <!-- Injected by JavaScript -->
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Empty State for filtered results -->
+            <div id="no-txns-state" class="hidden text-center py-12">
+              <div class="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-3">
+                <i data-lucide="inbox" class="w-6 h-6"></i>
+              </div>
+              <p class="font-bold text-slate-700 text-sm">No transactions found</p>
+              <p class="text-xs text-slate-500 mt-1">Try resetting your filter parameters or search term.</p>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- CUSTOMER VIEW: 4. SERVICE REQUESTS             -->
+        <!-- ============================================== -->
+        <section id="tab-services" class="customer-subpage hidden space-y-6">
+          
+          <div class="bg-white rounded-2xl border border-slate-200/90 p-6 sm:p-8 shadow-xs">
+            <h2 class="text-2xl font-extrabold text-slate-900">Banking Products & Service Applications</h2>
+            <p class="text-sm text-slate-500 mt-1">
+              Apply for premium payment instruments and Cheque leaves. Applications are routed directly to Bank Administration for compliance review.
+            </p>
+
+            <!-- Grid of 2 Forms: Credit Card & Chequebook -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
+              
+              <!-- 1. Credit Card Application -->
+              <div class="p-6 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col justify-between">
+                <div>
+                  <div class="w-12 h-12 rounded-xl bg-gradient-to-tr from-bank-900 to-bank-700 text-accent-gold flex items-center justify-center mb-4 shadow-xs">
+                    <i data-lucide="credit-card" class="w-6 h-6"></i>
+                  </div>
+                  <h3 class="text-lg font-bold text-slate-900">Apply for Apex Credit Card</h3>
+                  <p class="text-xs text-slate-500 mt-1 leading-relaxed">
+                    Elevate your spending power with zero foreign transaction fees, contactless tap-to-pay, and up to 3% cash back on commercial purchases.
+                  </p>
+
+                  <form id="form-card-request" onsubmit="handleCreditCardApply(event)" class="mt-5 space-y-4">
+                    <div>
+                      <label for="card-type-select" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                        Select Card Tier *
+                      </label>
+                      <select id="card-type-select" required class="w-full py-2 px-3 bg-white border border-slate-300 rounded-xl text-xs sm:text-sm font-medium">
+                        <option value="Apex Platinum Rewards (Limit up to $15,000)">Apex Platinum Rewards (Up to $15,000 Limit)</option>
+                        <option value="Horizon Sapphire Infinite (Limit up to $30,000)">Horizon Sapphire Infinite (Up to $30,000 Limit)</option>
+                        <option value="Apex Executive Corporate Black (Limit up to $75,000)">Apex Executive Corporate Black ($75,000+ Limit)</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label for="card-annual-income" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                        Verified Annual Income ($ USD) *
+                      </label>
+                      <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 font-bold">$</span>
+                        <input 
+                          type="number" 
+                          id="card-annual-income" 
+                          required
+                          min="15000"
+                          placeholder="85000"
+                          class="w-full pl-7 pr-3 py-2 bg-white border border-slate-300 rounded-xl text-xs sm:text-sm font-mono focus:ring-2 focus:ring-bank-600"
+                        >
+                      </div>
+                    </div>
+
+                    <div>
+                      <label for="card-employment" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                        Employment Status
+                      </label>
+                      <select id="card-employment" class="w-full py-2 px-3 bg-white border border-slate-300 rounded-xl text-xs sm:text-sm">
+                        <option value="Full-Time Employed">Full-Time Employed</option>
+                        <option value="Self-Employed / Business Owner">Self-Employed / Business Owner</option>
+                        <option value="Executive Officer">Executive / Partner</option>
+                        <option value="Professional Contractor">Professional Contractor</option>
+                      </select>
+                    </div>
+
+                    <button 
+                      type="submit" 
+                      class="w-full py-2.5 px-4 bg-bank-800 hover:bg-bank-900 text-white font-bold text-xs sm:text-sm rounded-xl shadow-xs transition flex items-center justify-center gap-2"
+                    >
+                      <i data-lucide="send" class="w-4 h-4"></i>
+                      <span>Submit Credit Card Application</span>
+                    </button>
+                  </form>
+                </div>
+              </div>
+
+              <!-- 2. Chequebook Request -->
+              <div class="p-6 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col justify-between">
+                <div>
+                  <div class="w-12 h-12 rounded-xl bg-gradient-to-tr from-bank-800 to-bank-600 text-emerald-300 flex items-center justify-center mb-4 shadow-xs">
+                    <i data-lucide="book-open" class="w-6 h-6"></i>
+                  </div>
+                  <h3 class="text-lg font-bold text-slate-900">Request Chequebook</h3>
+                  <p class="text-xs text-slate-500 mt-1 leading-relaxed">
+                    Order a personalized MICR-encoded cheque leaf binder delivered directly to your verified mailing address within 3-5 business days.
+                  </p>
+
+                  <form id="form-cheque-request" onsubmit="handleChequebookRequest(event)" class="mt-5 space-y-4">
+                    <div>
+                      <label for="cheque-account" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                        Linked Account *
+                      </label>
+                      <select id="cheque-account" required class="w-full py-2 px-3 bg-white border border-slate-300 rounded-xl text-xs sm:text-sm font-medium">
+                        <option value="checking">Checking Account (•••• 4891)</option>
+                        <option value="savings">Savings Account (•••• 9920)</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label for="cheque-leaves" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                        Cheque Leaves Count *
+                      </label>
+                      <select id="cheque-leaves" required class="w-full py-2 px-3 bg-white border border-slate-300 rounded-xl text-xs sm:text-sm font-medium">
+                        <option value="25 Leaves (Standard Personal)">25 Leaves (Standard Personal - Free)</option>
+                        <option value="50 Leaves (Commercial)">50 Leaves (Commercial - Free)</option>
+                        <option value="100 Leaves (Corporate Ledger)">100 Leaves (Corporate Ledger - Free)</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label for="cheque-address" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                        Confirm Mailing Address *
+                      </label>
+                      <textarea 
+                        id="cheque-address" 
+                        rows="2" 
+                        required
+                        placeholder="742 Evergreen Terrace, Suite 400, Springfield, IL 62704"
+                        class="w-full py-2 px-3 bg-white border border-slate-300 rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-bank-600"
+                      ></textarea>
+                    </div>
+
+                    <button 
+                      type="submit" 
+                      class="w-full py-2.5 px-4 bg-bank-800 hover:bg-bank-900 text-white font-bold text-xs sm:text-sm rounded-xl shadow-xs transition flex items-center justify-center gap-2"
+                    >
+                      <i data-lucide="package" class="w-4 h-4"></i>
+                      <span>Order Chequebook Binder</span>
+                    </button>
+                  </form>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- User's Existing Service Requests Status Table -->
+            <div class="mt-10 pt-6 border-t border-slate-100">
+              <h3 class="font-bold text-slate-900 text-base mb-3">Your Submitted Service Requests Status</h3>
+              <div class="overflow-x-auto rounded-xl border border-slate-200">
+                <table class="w-full text-left text-xs">
+                  <thead class="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider text-[11px] border-b border-slate-200">
+                    <tr>
+                      <th class="py-3 px-4">Request ID</th>
+                      <th class="py-3 px-4">Service Type</th>
+                      <th class="py-3 px-4">Specifications</th>
+                      <th class="py-3 px-4">Date Filed</th>
+                      <th class="py-3 px-4 text-center">Status</th>
+                      <th class="py-3 px-4 text-center">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="my-requests-body" class="divide-y divide-slate-100 text-slate-700">
+                    <!-- Populated by JS -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+          </div>
+
+        </section>
+
+        <!-- ============================================== -->
+        <!-- ADMIN VIEW: 1. GLOBAL OVERVIEW & LIQUIDITY     -->
+        <!-- ============================================== -->
+        <section id="tab-admin-overview" class="admin-subpage hidden space-y-6">
+          
+          <!-- Admin Hero Header -->
+          <div class="bg-gradient-to-r from-bank-950 via-bank-900 to-bank-800 rounded-2xl p-6 text-white shadow-md relative overflow-hidden flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+              <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-md bg-bank-800 text-accent-gold text-xs font-bold mb-2 border border-bank-700">
+                <i data-lucide="shield" class="w-3.5 h-3.5"></i>
+                Administrative Control Console
+              </div>
+              <h2 class="text-2xl font-extrabold text-white">Welcome, <span id="admin-officer-name">Chief Officer Morgan Vance</span></h2>
+              <p class="text-slate-300 text-xs sm:text-sm mt-1">Supervisory metrics across active depositors, vault liquidity ratio, and approval pipelines.</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="resetBankDemoData()" class="px-3 py-2 bg-bank-800 hover:bg-bank-700 border border-bank-700 text-white font-bold text-xs rounded-xl transition flex items-center gap-1.5" title="Reset simulation state to defaults">
+                <i data-lucide="rotate-ccw" class="w-3.5 h-3.5 text-amber-400"></i>
+                Reset Demo DB
+              </button>
+            </div>
+          </div>
+
+          <!-- Key Metrics Tiles -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs">
+              <div class="flex items-center justify-between text-slate-500 mb-2">
+                <span class="text-xs font-bold uppercase tracking-wider">Total Active Users</span>
+                <i data-lucide="users" class="w-5 h-5 text-bank-600"></i>
+              </div>
+              <p class="text-2xl sm:text-3xl font-extrabold text-slate-900 font-mono" id="admin-metric-users">0</p>
+              <div class="mt-2 text-[11px] text-emerald-600 font-semibold flex items-center gap-1">
+                <i data-lucide="trending-up" class="w-3 h-3"></i> 100% KYC Verified
+              </div>
+            </div>
+
+            <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs">
+              <div class="flex items-center justify-between text-slate-500 mb-2">
+                <span class="text-xs font-bold uppercase tracking-wider">Total System Liquidity</span>
+                <i data-lucide="landmark" class="w-5 h-5 text-emerald-600"></i>
+              </div>
+              <p class="text-2xl sm:text-3xl font-extrabold text-slate-900 font-mono" id="admin-metric-liquidity">$0.00</p>
+              <div class="mt-2 text-[11px] text-slate-500 flex items-center gap-1">
+                Fed Reserve ratio: <strong class="text-slate-700">18.4%</strong>
+              </div>
+            </div>
+
+            <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs">
+              <div class="flex items-center justify-between text-slate-500 mb-2">
+                <span class="text-xs font-bold uppercase tracking-wider">Pending Approvals</span>
+                <i data-lucide="clock" class="w-5 h-5 text-amber-500"></i>
+              </div>
+              <p class="text-2xl sm:text-3xl font-extrabold text-amber-600 font-mono" id="admin-metric-pending">0</p>
+              <div class="mt-2 text-[11px] text-amber-700 font-semibold flex items-center gap-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span> Action Required
+              </div>
+            </div>
+
+            <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs">
+              <div class="flex items-center justify-between text-slate-500 mb-2">
+                <span class="text-xs font-bold uppercase tracking-wider">Total Transactions</span>
+                <i data-lucide="activity" class="w-5 h-5 text-indigo-600"></i>
+              </div>
+              <p class="text-2xl sm:text-3xl font-extrabold text-slate-900 font-mono" id="admin-metric-txns">0</p>
+              <div class="mt-2 text-[11px] text-slate-500 flex items-center gap-1">
+                Audit Status: <span class="text-emerald-600 font-bold">Compliant</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Navigation Cards to Admin actions -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs flex flex-col justify-between">
+              <div>
+                <div class="w-10 h-10 rounded-xl bg-bank-100 text-bank-700 flex items-center justify-center mb-3">
+                  <i data-lucide="shield-check" class="w-5 h-5"></i>
+                </div>
+                <h3 class="font-bold text-slate-900 text-base">Service Requests Approval Queue</h3>
+                <p class="text-xs text-slate-500 mt-1">Review, authorize, or decline customer filings for Credit Cards and personalized Chequebooks.</p>
+              </div>
+              <button onclick="switchAdminTab('tab-admin-approvals')" class="mt-4 px-4 py-2.5 bg-bank-800 hover:bg-bank-900 text-white font-bold text-xs rounded-xl transition flex items-center justify-center gap-2">
+                <span>Open Approval Queue</span>
+                <i data-lucide="arrow-right" class="w-4 h-4"></i>
+              </button>
+            </div>
+
+            <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs flex flex-col justify-between">
+              <div>
+                <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center mb-3">
+                  <i data-lucide="user-check" class="w-5 h-5"></i>
+                </div>
+                <h3 class="font-bold text-slate-900 text-base">Registered Depositor Management</h3>
+                <p class="text-xs text-slate-500 mt-1">Audit customer records, masked account credentials, risk profiles, and aggregate customer holdings.</p>
+              </div>
+              <button onclick="switchAdminTab('tab-admin-users')" class="mt-4 px-4 py-2.5 bg-bank-800 hover:bg-bank-900 text-white font-bold text-xs rounded-xl transition flex items-center justify-center gap-2">
+                <span>View User Directory</span>
+                <i data-lucide="arrow-right" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Master System Activity Stream -->
+          <div class="bg-white rounded-2xl border border-slate-200 shadow-xs p-5">
+            <h3 class="font-bold text-slate-900 text-base mb-1">Global System Transaction Stream</h3>
+            <p class="text-xs text-slate-500 mb-4">Real-time ledger events recorded across all customer accounts.</p>
+            <div class="overflow-x-auto rounded-xl border border-slate-200">
+              <table class="w-full text-left text-xs">
+                <thead class="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider text-[11px] border-b border-slate-200">
+                  <tr>
+                    <th class="py-3 px-4">Timestamp</th>
+                    <th class="py-3 px-4">Account Holder</th>
+                    <th class="py-3 px-4">Operation</th>
+                    <th class="py-3 px-4 text-right">Amount</th>
+                    <th class="py-3 px-4 text-center">Settlement Status</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-global-txns-body" class="divide-y divide-slate-100 text-slate-700">
+                  <!-- Populated by JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- ============================================== -->
+        <!-- ADMIN VIEW: 2. USER DIRECTORY                  -->
+        <!-- ============================================== -->
+        <section id="tab-admin-users" class="admin-subpage hidden space-y-6">
+          <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-5 border-b border-slate-100">
+              <div>
+                <h2 class="text-2xl font-extrabold text-slate-900">Registered Customer Accounts</h2>
+                <p class="text-xs sm:text-sm text-slate-500 mt-1">Listing of all registered bank patrons with compliance masking.</p>
+              </div>
+              <button onclick="openCreateUserModal()" class="px-3.5 py-2 bg-bank-800 hover:bg-bank-900 text-white font-bold text-xs rounded-xl transition flex items-center gap-1.5">
+                <i data-lucide="user-plus" class="w-3.5 h-3.5"></i>
+                <span>Register New Patron</span>
+              </button>
+            </div>
+
+            <!-- Users Table -->
+            <div class="overflow-x-auto mt-6 rounded-xl border border-slate-200">
+              <table class="w-full text-left text-xs sm:text-sm">
+                <thead class="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider text-[11px] border-b border-slate-200">
+                  <tr>
+                    <th class="py-3.5 px-4">Customer Name & ID</th>
+                    <th class="py-3.5 px-4">Masked Checking Acc</th>
+                    <th class="py-3.5 px-4">Masked Savings Acc</th>
+                    <th class="py-3.5 px-4 text-right">Checking Balance</th>
+                    <th class="py-3.5 px-4 text-right">Savings Balance</th>
+                    <th class="py-3.5 px-4 text-center">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-users-table-body" class="divide-y divide-slate-100 text-slate-700">
+                  <!-- Populated by JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- ADMIN VIEW: 3. APPROVAL QUEUE                  -->
+        <!-- ============================================== -->
+        <section id="tab-admin-approvals" class="admin-subpage hidden space-y-6">
+          <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-5 border-b border-slate-100">
+              <div>
+                <h2 class="text-2xl font-extrabold text-slate-900">Service Requests Approval Queue</h2>
+                <p class="text-xs sm:text-sm text-slate-500 mt-1">
+                  Authorize or decline customer applications for Credit Cards and Chequebooks.
+                </p>
+              </div>
+              
+              <!-- Quick filter -->
+              <div class="flex items-center gap-2">
+                <select id="admin-filter-request-status" onchange="renderAdminApprovalQueue()" class="py-2 px-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold">
+                  <option value="pending">Pending Only</option>
+                  <option value="all">All Requests</option>
+                  <option value="approved">Approved</option>
+                  <option value="rejected">Rejected</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Queue Table -->
+            <div class="overflow-x-auto mt-6 rounded-xl border border-slate-200">
+              <table class="w-full text-left text-xs sm:text-sm">
+                <thead class="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider text-[11px] border-b border-slate-200">
+                  <tr>
+                    <th class="py-3.5 px-4">Req # / Date</th>
+                    <th class="py-3.5 px-4">Customer</th>
+                    <th class="py-3.5 px-4">Service Category</th>
+                    <th class="py-3.5 px-4">Filing Details</th>
+                    <th class="py-3.5 px-4 text-center">Status</th>
+                    <th class="py-3.5 px-4 text-center">Decision Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-approvals-table-body" class="divide-y divide-slate-100 text-slate-700">
+                  <!-- Populated by JS -->
+                </tbody>
+              </table>
+            </div>
+
+            <div id="admin-empty-approvals" class="hidden text-center py-12">
+              <div class="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto mb-3">
+                <i data-lucide="check-circle" class="w-6 h-6"></i>
+              </div>
+              <p class="font-bold text-slate-800 text-sm">Approval Queue is All Clear!</p>
+              <p class="text-xs text-slate-500 mt-1">No pending filings require review under this filter.</p>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+
+  </main>
+
+  <!-- ================= MODALS ================= -->
+
+  <!-- 1. Self Transfer Modal (Checking <-> Savings) -->
+  <div id="modal-self-transfer" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-md w-full p-6 animate-scale-up">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+        <h3 class="font-bold text-slate-900 text-lg flex items-center gap-2">
+          <i data-lucide="repeat" class="w-5 h-5 text-bank-600"></i>
+          Self-Account Transfer
+        </h3>
+        <button onclick="closeSelfTransferModal()" class="text-slate-400 hover:text-slate-600">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <form onsubmit="handleSelfTransferSubmit(event)" class="mt-4 space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Transfer Direction</label>
+          <select id="self-transfer-direction" class="w-full py-2.5 px-3 bg-slate-50 border border-slate-300 rounded-xl text-xs sm:text-sm font-semibold">
+            <option value="checking-to-savings">Checking → High-Yield Savings</option>
+            <option value="savings-to-checking">High-Yield Savings → Checking</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Amount ($ USD)</label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 font-bold">$</span>
+            <input type="number" id="self-transfer-amount" step="0.01" min="1.00" required placeholder="100.00" class="w-full pl-7 pr-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm font-mono font-bold focus:bg-white focus:ring-2 focus:ring-bank-600">
+          </div>
+        </div>
+        <div class="pt-2 flex items-center justify-end gap-2">
+          <button type="button" onclick="closeSelfTransferModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl">Cancel</button>
+          <button type="submit" class="px-4 py-2 bg-bank-800 hover:bg-bank-900 text-white font-bold text-xs rounded-xl">Move Funds Now</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 2. Forgot Password Modal -->
+  <div id="modal-forgot-pwd" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-md w-full p-6 animate-scale-up">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+        <h3 class="font-bold text-slate-900 text-lg flex items-center gap-2">
+          <i data-lucide="key" class="w-5 h-5 text-amber-500"></i>
+          Account Recovery Assistance
+        </h3>
+        <button onclick="closeForgotPasswordModal()" class="text-slate-400 hover:text-slate-600">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <div class="mt-4 space-y-4 text-xs text-slate-600">
+        <p>
+          For security in this banking simulation, you can sign in directly using the pre-configured credentials:
+        </p>
+        <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2 font-mono">
+          <div><strong class="text-bank-800">Customer 1:</strong> user: <code>jane</code> / pass: <code>1234</code></div>
+          <div><strong class="text-bank-800">Customer 2:</strong> user: <code>alex</code> / pass: <code>1234</code></div>
+          <div><strong class="text-amber-800">Bank Admin:</strong> user: <code>admin</code> / pass: <code>admin</code></div>
+        </div>
+        <p class="text-slate-500">
+          Alternatively, contact our automated telephone hotline at <strong class="text-slate-700">1-800-555-APEX</strong> for a one-time OTP recovery link.
+        </p>
+        <div class="pt-2 text-right">
+          <button onclick="closeForgotPasswordModal()" class="px-4 py-2 bg-bank-800 hover:bg-bank-900 text-white font-bold text-xs rounded-xl">Got It</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Admin: Register New User Modal -->
+  <div id="modal-create-user" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-md w-full p-6 animate-scale-up">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+        <h3 class="font-bold text-slate-900 text-lg flex items-center gap-2">
+          <i data-lucide="user-plus" class="w-5 h-5 text-bank-600"></i>
+          Register New Patron
+        </h3>
+        <button onclick="closeCreateUserModal()" class="text-slate-400 hover:text-slate-600">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <form onsubmit="handleAdminCreateUser(event)" class="mt-4 space-y-3.5 text-xs">
+        <div>
+          <label class="block font-bold text-slate-700 uppercase mb-1">Full Name *</label>
+          <input type="text" id="new-user-fullname" required placeholder="e.g. David Vance" class="w-full py-2 px-3 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-bank-600">
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 uppercase mb-1">Username *</label>
+          <input type="text" id="new-user-username" required placeholder="e.g. david" class="w-full py-2 px-3 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-bank-600">
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 uppercase mb-1">Password *</label>
+          <input type="password" id="new-user-password" required value="1234" class="w-full py-2 px-3 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-bank-600">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-700 uppercase mb-1">Checking Initial Deposit *</label>
+            <input type="number" id="new-user-checking" required value="2500" min="50" class="w-full py-2 px-3 bg-slate-50 border border-slate-300 rounded-xl text-sm font-mono focus:ring-2 focus:ring-bank-600">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 uppercase mb-1">Savings Initial Deposit *</label>
+            <input type="number" id="new-user-savings" required value="5000" min="50" class="w-full py-2 px-3 bg-slate-50 border border-slate-300 rounded-xl text-sm font-mono focus:ring-2 focus:ring-bank-600">
+          </div>
+        </div>
+        <div class="pt-2 flex items-center justify-end gap-2">
+          <button type="button" onclick="closeCreateUserModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl">Cancel</button>
+          <button type="submit" class="px-4 py-2 bg-bank-800 hover:bg-bank-900 text-white font-bold rounded-xl">Create Account</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 4. Self Account Registration Modal (Open New Account) -->
+  <div id="modal-self-register" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-lg w-full p-6 animate-scale-up max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+        <div>
+          <h3 class="font-bold text-slate-900 text-lg flex items-center gap-2">
+            <i data-lucide="building" class="w-5 h-5 text-bank-600"></i>
+            Open an Apex Horizon Account
+          </h3>
+          <p class="text-xs text-slate-500 mt-0.5">Instant online onboarding with Checking & High-Yield Savings.</p>
+        </div>
+        <button onclick="closeSelfRegisterModal()" class="text-slate-400 hover:text-slate-600">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form onsubmit="handleSelfRegisterSubmit(event)" class="mt-4 space-y-4 text-xs">
+        <div>
+          <label class="block font-bold text-slate-700 uppercase mb-1">Full Legal Name *</label>
+          <input type="text" id="reg-fullname" required placeholder="e.g. Sarah Connor" class="w-full py-2.5 px-3 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-bank-600">
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-700 uppercase mb-1">Username (Login ID) *</label>
+            <input type="text" id="reg-username" required placeholder="e.g. sarah" class="w-full py-2.5 px-3 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-bank-600">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 uppercase mb-1">Account Password *</label>
+            <input type="password" id="reg-password" required placeholder="••••••••" class="w-full py-2.5 px-3 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-bank-600">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-700 uppercase mb-1">Email Address *</label>
+            <input type="email" id="reg-email" required placeholder="sarah@example.com" class="w-full py-2.5 px-3 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-bank-600">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 uppercase mb-1">Phone Number *</label>
+            <input type="tel" id="reg-phone" required placeholder="+1 (555) 000-1122" class="w-full py-2.5 px-3 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-bank-600">
+          </div>
+        </div>
+
+        <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
+          <div class="text-xs font-bold text-bank-800 uppercase tracking-wider">Initial Funding Deposits</div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Premier Checking Deposit ($)</label>
+              <input type="number" id="reg-checking" min="25" step="1" required value="1000" class="w-full py-2 px-3 bg-white border border-slate-300 rounded-xl text-sm font-mono focus:ring-2 focus:ring-bank-600">
+              <span class="text-[10px] text-slate-400">Min: $25.00</span>
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">High-Yield Savings Deposit ($)</label>
+              <input type="number" id="reg-savings" min="25" step="1" required value="2500" class="w-full py-2 px-3 bg-white border border-slate-300 rounded-xl text-sm font-mono focus:ring-2 focus:ring-bank-600">
+              <span class="text-[10px] text-slate-400">Min: $25.00 (4.85% APY)</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-900 text-[11px] flex items-start gap-2">
+          <i data-lucide="shield-check" class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5"></i>
+          <span>Accounts come with complimentary FDIC insurance protection up to $250,000, free electronic routing, and immediate ledger activation.</span>
+        </div>
+
+        <div class="pt-2 flex items-center justify-end gap-2">
+          <button type="button" onclick="closeSelfRegisterModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl">Cancel</button>
+          <button type="submit" class="px-5 py-2.5 bg-bank-800 hover:bg-bank-900 text-white font-bold rounded-xl shadow-xs flex items-center gap-2">
+            <i data-lucide="check" class="w-4 h-4"></i>
+            <span>Create Account & Sign In</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 5. Phone OTP Verification Modal (MiniMoth API) -->
+  <div id="modal-otp-verify" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl border border-slate-200/90 shadow-2xl max-w-md w-full p-6 sm:p-7 animate-scale-up relative">
+      <button onclick="closeOtpModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition p-1 rounded-lg hover:bg-slate-100">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div class="text-center mb-6">
+        <div class="w-14 h-14 bg-bank-50 border border-bank-200 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-xs">
+          <i data-lucide="smartphone" class="w-7 h-7 text-bank-700"></i>
+        </div>
+        <h3 class="text-xl font-bold text-slate-900">Phone Verification</h3>
+        <p class="text-xs text-slate-500 mt-1.5 leading-relaxed">
+          For enhanced online banking safety, a secure 6-digit One-Time Password (OTP) has been dispatched.
+        </p>
+        <div class="mt-2.5 inline-flex items-center gap-2 px-3 py-1 bg-slate-100 rounded-full border border-slate-200 text-xs font-mono font-bold text-slate-800">
+          <i data-lucide="phone" class="w-3.5 h-3.5 text-bank-600"></i>
+          <span id="otp-phone-display">+91 ••••• •••••</span>
+        </div>
+      </div>
+
+      <!-- Live vs Demo Notification Alert -->
+      <div id="otp-status-banner" class="hidden mb-4 p-3 rounded-xl text-xs font-medium border flex items-start gap-2.5">
+        <i data-lucide="info" class="w-4 h-4 shrink-0 mt-0.5" id="otp-status-icon"></i>
+        <div class="flex-1" id="otp-status-text"></div>
+      </div>
+
+      <!-- OTP Input Boxes -->
+      <form id="form-otp-verify" onsubmit="handleOtpVerifySubmit(event)" class="space-y-5">
+        <div>
+          <label class="block text-center text-xs font-bold uppercase tracking-wider text-slate-600 mb-3">
+            Enter 6-Digit Verification Code
+          </label>
+          <div class="flex justify-center items-center gap-2 sm:gap-2.5" id="otp-inputs-container">
+            <input type="text" maxlength="1" inputmode="numeric" class="otp-digit w-11 h-13 text-center text-xl font-bold font-mono border-2 border-slate-300 rounded-xl focus:border-bank-600 focus:ring-2 focus:ring-bank-500/20 focus:outline-none bg-slate-50 focus:bg-white transition" required>
+            <input type="text" maxlength="1" inputmode="numeric" class="otp-digit w-11 h-13 text-center text-xl font-bold font-mono border-2 border-slate-300 rounded-xl focus:border-bank-600 focus:ring-2 focus:ring-bank-500/20 focus:outline-none bg-slate-50 focus:bg-white transition" required>
+            <input type="text" maxlength="1" inputmode="numeric" class="otp-digit w-11 h-13 text-center text-xl font-bold font-mono border-2 border-slate-300 rounded-xl focus:border-bank-600 focus:ring-2 focus:ring-bank-500/20 focus:outline-none bg-slate-50 focus:bg-white transition" required>
+            <span class="text-slate-300 font-bold">-</span>
+            <input type="text" maxlength="1" inputmode="numeric" class="otp-digit w-11 h-13 text-center text-xl font-bold font-mono border-2 border-slate-300 rounded-xl focus:border-bank-600 focus:ring-2 focus:ring-bank-500/20 focus:outline-none bg-slate-50 focus:bg-white transition" required>
+            <input type="text" maxlength="1" inputmode="numeric" class="otp-digit w-11 h-13 text-center text-xl font-bold font-mono border-2 border-slate-300 rounded-xl focus:border-bank-600 focus:ring-2 focus:ring-bank-500/20 focus:outline-none bg-slate-50 focus:bg-white transition" required>
+            <input type="text" maxlength="1" inputmode="numeric" class="otp-digit w-11 h-13 text-center text-xl font-bold font-mono border-2 border-slate-300 rounded-xl focus:border-bank-600 focus:ring-2 focus:ring-bank-500/20 focus:outline-none bg-slate-50 focus:bg-white transition" required>
+          </div>
+        </div>
+
+        <div id="otp-error-msg" class="hidden p-3 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium text-center"></div>
+
+        <button 
+          type="submit" 
+          id="btn-otp-verify-submit"
+          class="w-full py-3 px-4 bg-bank-800 hover:bg-bank-900 active:bg-bank-950 text-white font-bold text-sm rounded-xl shadow-md hover:shadow-lg transition flex items-center justify-center gap-2"
+        >
+          <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400"></i>
+          <span>Verify & Unlock Banking Portal</span>
+        </button>
+
+        <!-- Resend and Countdown -->
+        <div class="flex items-center justify-between text-xs text-slate-500 pt-2 border-t border-slate-100">
+          <div>
+            Didn't get code? 
+            <button type="button" id="btn-otp-resend" onclick="resendOtpCode()" class="font-bold text-bank-600 hover:text-bank-800 disabled:opacity-50 disabled:cursor-not-allowed">
+              Resend OTP
+            </button>
+          </div>
+          <div id="otp-timer-display" class="font-mono text-slate-400 font-semibold">01:00</div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- ================= AUTHENTIC FOOTER ================= -->
+  <footer class="bg-bank-950 text-slate-400 text-xs border-t border-bank-800 mt-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-6 pb-6 border-b border-bank-900">
+        <div>
+          <div class="flex items-center gap-2 mb-2 text-white font-bold text-sm">
+            <i data-lucide="shield" class="w-4 h-4 text-accent-gold"></i>
+            Apex Horizon Trust
+          </div>
+          <p class="text-[11px] text-slate-400 leading-relaxed">
+            Chartered national retail bank providing digital treasury, consumer deposit accounts, and commercial credit services. Member FDIC. Equal Housing Lender.
+          </p>
+        </div>
+        <div>
+          <h4 class="text-white font-bold text-xs uppercase tracking-wider mb-2">Legal & Disclosure</h4>
+          <ul class="space-y-1 text-[11px]">
+            <li><a href="#" onclick="showLegalNotice('privacy'); return false;" class="hover:text-slate-200 transition">Online Privacy Statement</a></li>
+            <li><a href="#" onclick="showLegalNotice('terms'); return false;" class="hover:text-slate-200 transition">Electronic Banking Terms</a></li>
+            <li><a href="#" onclick="showLegalNotice('fdic'); return false;" class="hover:text-slate-200 transition">FDIC Insurance Limit Rules</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="text-white font-bold text-xs uppercase tracking-wider mb-2">Security Hub</h4>
+          <ul class="space-y-1 text-[11px]">
+            <li><a href="#" onclick="showLegalNotice('security'); return false;" class="hover:text-slate-200 transition">Fraud Prevention Guide</a></li>
+            <li><a href="#" onclick="showLegalNotice('phishing'); return false;" class="hover:text-slate-200 transition">Report Phishing Attempt</a></li>
+            <li><span class="text-emerald-400 font-mono text-[10px]">ISO 27001 Certified System</span></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="text-white font-bold text-xs uppercase tracking-wider mb-2">Live Support</h4>
+          <p class="text-[11px] text-slate-400">Headquarters: 100 Wall Street, New York, NY</p>
+          <p class="text-[11px] text-slate-400 mt-1">Direct Help Desk: <strong>1-800-555-APEX</strong></p>
+          <p class="text-[10px] text-slate-500 mt-2 font-mono">Routing ID: 021000021 | SWIFT: APEXUS33</p>
+        </div>
+      </div>
+      
+      <div class="pt-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] text-slate-400">
+        <p>© 2026 Apex Horizon National Bank. All rights reserved. Banking Simulator Demo Environment.</p>
+        <p class="font-mono text-[10px] text-slate-400">Build v3.4.2-SECURE | Client IP: 192.168.1.108</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="script.js"></script>
+  <script>
+    // Initialize Lucide icons
+    document.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+    });
+  </script>
+</body>
+</html>

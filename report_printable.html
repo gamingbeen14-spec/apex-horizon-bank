@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Apex Horizon National Bank - Project Detailed Report</title>
+  <style>
+    @page {
+      size: A4;
+      margin: 18mm 16mm 18mm 16mm;
+
+      @bottom-right {
+        content: counter(page);
+      }
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: #1e293b;
+      line-height: 1.55;
+      font-size: 11pt;
+      margin: 0;
+      padding: 0;
+    }
+
+    .header-banner {
+      background: linear-gradient(135deg, #0b192c 0%, #1e3a5f 100%);
+      color: #ffffff;
+      padding: 24px;
+      border-radius: 8px;
+      margin-bottom: 24px;
+    }
+
+    .header-banner h1 {
+      margin: 0 0 6px 0;
+      font-size: 20pt;
+      letter-spacing: -0.5px;
+      color: #ffffff;
+    }
+
+    .header-banner .subtitle {
+      font-size: 11pt;
+      color: #cbd5e1;
+      margin-bottom: 12px;
+    }
+
+    .badge-row {
+      display: flex;
+      gap: 12px;
+      font-size: 9pt;
+      color: #94a3b8;
+    }
+
+    .badge {
+      background: rgba(255, 255, 255, 0.12);
+      padding: 3px 10px;
+      border-radius: 4px;
+      color: #f8fafc;
+      font-weight: 600;
+    }
+
+    h2 {
+      color: #0b192c;
+      font-size: 14pt;
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 5px;
+      margin-top: 26px;
+      margin-bottom: 12px;
+    }
+
+    h3 {
+      color: #1e3a5f;
+      font-size: 11.5pt;
+      margin-top: 18px;
+      margin-bottom: 8px;
+    }
+
+    p {
+      margin: 0 0 10px 0;
+    }
+
+    ul,
+    ol {
+      margin: 0 0 12px 0;
+      padding-left: 20px;
+    }
+
+    li {
+      margin-bottom: 4px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 14px 0 20px 0;
+      font-size: 9.5pt;
+    }
+
+    th,
+    td {
+      border: 1px solid #cbd5e1;
+      padding: 8px 10px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #f1f5f9;
+      color: #0f172a;
+      font-weight: 700;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f8fafc;
+    }
+
+    .badge-pass {
+      display: inline-block;
+      background: #dcfce7;
+      color: #166534;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 8.5pt;
+    }
+
+    .callout {
+      background: #f0f7ff;
+      border-left: 4px solid #2563eb;
+      padding: 12px 14px;
+      border-radius: 0 6px 6px 0;
+      margin: 14px 0;
+      font-size: 10pt;
+    }
+
+    .page-break {
+      page-break-after: always;
+    }
+
+    code {
+      font-family: Consolas, monospace;
+      background: #f1f5f9;
+      padding: 2px 5px;
+      border-radius: 4px;
+      font-size: 9pt;
+      color: #0f172a;
+    }
+
+    .footer {
+      margin-top: 30px;
+      border-top: 1px solid #cbd5e1;
+      padding-top: 10px;
+      font-size: 8.5pt;
+      color: #64748b;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Header Banner -->
+  <div class="header-banner">
+    <h1>APEX HORIZON NATIONAL BANK</h1>
+    <div class="subtitle">Online Banking Simulator & Administrative Supervisory System</div>
+    <div class="badge-row">
+      <span class="badge">Version: 3.4.2-SECURE</span>
+      <span class="badge">Classification: Technical Architecture Report</span>
+      <span class="badge">Environment: Localhost:3000</span>
+      <span class="badge">Status: Production Verified</span>
+    </div>
+  </div>
+
+  <!-- 1. Executive Summary -->
+  <h2>1. Executive Summary</h2>
+  <p>
+    The <strong>Apex Horizon Online Banking Simulator</strong> is an authentic, full-featured retail banking web
+    application crafted to replicate modern Tier-1 financial institutions (e.g. JPMorgan Chase, Citibank, and Bank of
+    America).
+  </p>
+  <p>The platform provides a complete banking lifecycle:</p>
+  <ul>
+    <li><strong>Customer Self-Service:</strong> Online account opening/onboarding, multi-account ledger balances
+      (Premier Checking and High-Yield Savings), Fedwire/ACH funds transfers with real-time balance settlement,
+      transaction statements with search/filter/CSV export, and customer service requests (Credit Cards and
+      Chequebooks).</li>
+    <li><strong>Bank Administration / Officer Console:</strong> Central bank liquidity & vault oversight, patron user
+      directory management with compliance account masking, and an interactive approval queue with Approve, Decline, and
+      Delete capabilities.</li>
+    <li><strong>Security & Compliance:</strong> 256-Bit TLS simulation, dynamic 5-minute inactivity session expiration
+      with countdown timer, anti-fraud notifications, GLBA data masking, and FDIC regulatory disclosures.</li>
+  </ul>
+
+  <!-- 2. Technology Stack & Architectural Design -->
+  <h2>2. Technology Stack & Architectural Design</h2>
+  <h3>2.1 Front-End Layer</h3>
+  <ul>
+    <li><strong>HTML5:</strong> Semantic architecture using landmarks (<code>header</code>, <code>nav</code>,
+      <code>aside</code>, <code>main</code>, <code>section</code>, <code>footer</code>) with ARIA compliance.
+    </li>
+    <li><strong>Tailwind CSS & Bespoke Design Tokens:</strong> Curated executive palette featuring Bank Navy
+      (<code>#0b192c</code>, <code>#060f1c</code>), Steel Blues (<code>#1e4f79</code>, <code>#286496</code>), and status
+      colors (Emerald <code>#10b981</code>, Gold <code>#c5a059</code>, Crimson <code>#ef4444</code>).</li>
+    <li><strong>Typography:</strong> Google Fonts <em>Plus Jakarta Sans</em> for modern UI readability and <em>JetBrains
+        Mono</em> for tabular numbers and balances.</li>
+    <li><strong>Iconography:</strong> Lucide Icons dynamic vector engine.</li>
+  </ul>
+
+  <h3>2.2 Single Page Application (SPA) Engine</h3>
+  <ul>
+    <li><strong>Client-Side Routing:</strong> Zero-reload dynamic DOM view manipulation switching seamlessly between
+      Login, Customer Dashboard, and Admin Console.</li>
+    <li><strong>Sub-Page Isolation:</strong> Dedicated view isolation ensuring Customer subpages and Admin subpages
+      never collide or leak into adjacent portals.</li>
+    <li><strong>Cross-Tab Synchronizer:</strong> Window <code>storage</code> event listener providing instant,
+      bidirectional real-time synchronization between concurrent browser tabs.</li>
+  </ul>
+
+  <h3>2.3 Mock Backend & Data Persistence</h3>
+  <ul>
+    <li><strong>Storage Engine:</strong> Browser <code>localStorage</code> functioning as an atomic JSON document store
+      under key <code>apex_horizon_bank_v1</code>.</li>
+    <li><strong>Relational Integrity:</strong> Automatic linkage between User IDs, debit/credit transactions, and
+      service request filings.</li>
+    <li><strong>Bilateral Clearing Simulation:</strong> Transfers between registered patrons automatically identify the
+      recipient account, crediting their balance while debiting the sender.</li>
+  </ul>
+
+  <div class="page-break"></div>
+
+  <!-- 3. Core Functional Modules -->
+  <h2>3. Core Functional Modules</h2>
+
+  <h3>3.1 Authentication & Onboarding Portal</h3>
+  <ul>
+    <li><strong>Dual-Mode Access Control:</strong> Seamless toggle tabs between Customer Portal and Bank Officer / Admin
+      Portal with role validation.</li>
+    <li><strong>Self-Service Account Creation:</strong> Direct online enrollment creating Checking
+      (<code>100XXXXXXX</code>) and High-Yield Savings (<code>200XXXXXXX</code>) accounts with initial deposits.</li>
+    <li><strong>Credentials Assistance:</strong> Quick Demo Fillers (<code>jane / 1234</code>,
+      <code>admin / admin</code>), show/hide password toggle, and Forgot Password recovery guidance.
+    </li>
+  </ul>
+
+  <h3>3.2 Customer Banking Experience</h3>
+  <ul>
+    <li><strong>Account Overview:</strong> Real-time balances for Premier Checking, High-Yield Growth Savings (4.85%
+      APY), and combined net liquid portfolio with credit score indicators.</li>
+    <li><strong>Funds Transfer Module (ACH & Fedwire):</strong> Source account selector, beneficiary routing
+      verification (9-digit ABA), purpose classification, and strict balance validation.</li>
+    <li><strong>Self-Account Transfer:</strong> Instant modal to move funds between personal Checking and Savings
+      accounts.</li>
+    <li><strong>Ledger & Statement Export:</strong> Chronological transaction records with dynamic search, account
+      filter, type filter (Debit/Credit), sorting, and instant CSV statement download.</li>
+    <li><strong>Service Requests:</strong> Tiered Credit Card applications and MICR chequebook leaf orders with live
+      status tracking and cancellation capabilities.</li>
+  </ul>
+
+  <h3>3.3 Bank Administration Console</h3>
+  <ul>
+    <li><strong>Central Vault & Liquidity Monitor:</strong> Supervisory metrics tracking active depositors, total
+      liquidity, pending compliance reviews, and global network transaction stream.</li>
+    <li><strong>User Directory Management:</strong> Roster of all registered customers with masked account details
+      (<code>•••• •••• 4891</code>), balance breakdowns, full patron audit modals, and manual patron onboarding.</li>
+    <li><strong>Approval Queue:</strong> Complete administrative triage permitting officers to <strong>Approve</strong>,
+      <strong>Decline</strong>, or permanently <strong>Delete/Purge</strong> filings.
+    </li>
+  </ul>
+
+  <!-- 4. Database Schema Specification -->
+  <h2>4. Database Schema Specification</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Entity</th>
+        <th>Field</th>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td rowspan="4"><strong>User</strong></td>
+        <td><code>id</code></td>
+        <td>String (PK)</td>
+        <td>Unique user identifier (e.g. <code>usr_001</code>)</td>
+      </tr>
+      <tr>
+        <td><code>username / password</code></td>
+        <td>String</td>
+        <td>Authentication credentials</td>
+      </tr>
+      <tr>
+        <td><code>checkingAcc / savingsAcc</code></td>
+        <td>String</td>
+        <td>10-digit account identifiers</td>
+      </tr>
+      <tr>
+        <td><code>checkingBalance / savingsBalance</code></td>
+        <td>Number</td>
+        <td>Cleared liquid balances</td>
+      </tr>
+      <tr>
+        <td rowspan="3"><strong>Transaction</strong></td>
+        <td><code>id</code></td>
+        <td>String (PK)</td>
+        <td>Unique transaction reference (e.g. <code>TXN-894101</code>)</td>
+      </tr>
+      <tr>
+        <td><code>userId / accountType</code></td>
+        <td>String (FK)</td>
+        <td>Account owner reference and account category</td>
+      </tr>
+      <tr>
+        <td><code>amount / balanceAfter / type</code></td>
+        <td>Number / String</td>
+        <td>Monetary value, running balance, debit/credit flag</td>
+      </tr>
+      <tr>
+        <td rowspan="3"><strong>ServiceRequest</strong></td>
+        <td><code>id</code></td>
+        <td>String (PK)</td>
+        <td>Tracking code (e.g. <code>REQ-1049</code>)</td>
+      </tr>
+      <tr>
+        <td><code>serviceType / details</code></td>
+        <td>String</td>
+        <td>Credit Card or Chequebook specifications</td>
+      </tr>
+      <tr>
+        <td><code>status</code></td>
+        <td>String</td>
+        <td>Current lifecycle status: <code>pending</code> | <code>approved</code> | <code>rejected</code></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="page-break"></div>
+
+  <!-- 5. Test Execution Matrix -->
+  <h2>5. Test Execution Matrix</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Test ID</th>
+        <th>Feature Scenario</th>
+        <th>Execution Steps & Criteria</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>TC-01</strong></td>
+        <td>Dual Portal Switching</td>
+        <td>Switch between Customer and Admin login portals; verify titles and inputs</td>
+        <td><span class="badge-pass">PASS</span></td>
+      </tr>
+      <tr>
+        <td><strong>TC-02</strong></td>
+        <td>Customer Authentication</td>
+        <td>Login with credentials <code>jane / 1234</code>; verify Jane's Overview dashboard</td>
+        <td><span class="badge-pass">PASS</span></td>
+      </tr>
+      <tr>
+        <td><strong>TC-03</strong></td>
+        <td>Overdraft Prevention</td>
+        <td>Attempt transfer exceeding available balance; verify validation alert</td>
+        <td><span class="badge-pass">PASS</span></td>
+      </tr>
+      <tr>
+        <td><strong>TC-04</strong></td>
+        <td>ACH Fund Transfer</td>
+        <td>Transfer $250.00; verify debit balance deduction and ledger record creation</td>
+        <td><span class="badge-pass">PASS</span></td>
+      </tr>
+      <tr>
+        <td><strong>TC-05</strong></td>
+        <td>Internal Inter-User Clearing</td>
+        <td>Send funds to registered peer; verify reciprocal credit to beneficiary account</td>
+        <td><span class="badge-pass">PASS</span></td>
+      </tr>
+      <tr>
+        <td><strong>TC-06</strong></td>
+        <td>Self-Account Transfer</td>
+        <td>Move $500 between Checking and Savings; verify bilateral ledger updates</td>
+        <td><span class="badge-pass">PASS</span></td>
+      </tr>
+      <tr>
+        <td><strong>TC-07</strong></td>
+        <td>Statement Filtering & Search</td>
+        <td>Filter by debit/credit and keyword; verify accurate real-time query rendering</td>
+        <td><span class="badge-pass">PASS</span></td>
+      </tr>
+      <tr>
+        <td><strong>TC-08</strong></td>
+        <td>Statement CSV Export</td>
+        <td>Click statement export; verify generated CSV download with full data rows</td>
+        <td><span class="badge-pass">PASS</span></td>
+      </tr>
+      <tr>
+        <td><strong>TC-09</strong></td>
+        <td>Service Product Applications</td>
+        <td>Apply for Credit Card and Chequebook; verify queue entry creation</td>
+        <td><span class="badge-pass">PASS</span></td>
+      </tr>
+      <tr>
+        <td><strong>TC-10</strong></td>
+        <td>Admin Approval & Rejection</td>
+        <td>Login as Admin; approve or decline pending filing; verify real-time status update</td>
+        <td><span class="badge-pass">PASS</span></td>
+      </tr>
+      <tr>
+        <td><strong>TC-11</strong></td>
+        <td>Filing Deletion & Cancellation</td>
+        <td>Customer cancels filing; admin deletes record; verify database cleanup</td>
+        <td><span class="badge-pass">PASS</span></td>
+      </tr>
+      <tr>
+        <td><strong>TC-12</strong></td>
+        <td>Cross-Tab Auto-Sync</td>
+        <td>Perform admin action in Tab A; verify instantaneous re-render in Tab B</td>
+        <td><span class="badge-pass">PASS</span></td>
+      </tr>
+      <tr>
+        <td><strong>TC-13</strong></td>
+        <td>Self-Service Onboarding</td>
+        <td>Register new user online; verify automatic account generation and sign-in</td>
+        <td><span class="badge-pass">PASS</span></td>
+      </tr>
+      <tr>
+        <td><strong>TC-14</strong></td>
+        <td>Database Factory Reset</td>
+        <td>Execute demo reset; verify restoration of initial seed records</td>
+        <td><span class="badge-pass">PASS</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- 6. Project Artifacts & File Inventory -->
+  <h2>6. Project File Inventory</h2>
+  <ul>
+    <li><strong>index.html:</strong> Single-page layout containing customer and admin views, modals, security tickers,
+      and styling links.</li>
+    <li><strong>style.css:</strong> Custom UI refinements, scrollbar styling, pulse animations, and modal animations.
+    </li>
+    <li><strong>script.js:</strong> Client-side state machine, database engine, routing controller, transfer processor,
+      and cross-tab synchronizer.</li>
+    <li><strong>README.md:</strong> User guide, developer quickstart, and credentials table.</li>
+    <li><strong>project_detailed_report.pdf:</strong> Official PDF technical report of the system.</li>
+  </ul>
+
+  <!-- 7. Conclusion & Roadmap -->
+  <h2>7. Conclusion & Roadmap</h2>
+  <div class="callout">
+    The <strong>Apex Horizon Banking Simulator</strong> delivers an authentic retail banking simulation meeting high
+    standards of UI design, strict validation logic, complete ledger management, and role-based supervisory oversight.
+  </div>
+  <p><strong>Recommended Future Enhancements:</strong></p>
+  <ol>
+    <li><strong>Backend REST/GraphQL Microservices:</strong> Migrate from client-side <code>localStorage</code> to a
+      Node.js/Express, Python/FastAPI, or Java Spring Boot backend paired with PostgreSQL.</li>
+    <li><strong>Cryptographic Security:</strong> Introduce salted BCrypt password hashing and JWT/OAuth2 bearer token
+      session authorization.</li>
+    <li><strong>Third-Party Financial Integrations:</strong> Connect Plaid or Stripe Treasury sandbox APIs for simulated
+      external bank linking and merchant settlement.</li>
+  </ol>
+
+  <div class="footer">
+    Apex Horizon National Bank Simulator &bull; Confidential Technical Project Report &bull; Generated October 2026
+  </div>
+
+</body>
+
+</html>
